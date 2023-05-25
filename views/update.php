@@ -4,12 +4,7 @@ require '../components/header.php';
 $newsId = $_GET['id'];
 $commentId = $_GET['commentId'];
 $replayId = $_GET['replayId'] ?? '';
-// var_dump($replayId);
-// echo '<pre>';
-// var_dump($_GET['username']);
-// var_dump($_GET['id']);
-// var_dump($_GET['commentId']);
-// echo '</pre>';
+
 if ($replayId) {
    $replay = "update replay no $replayId";
    // GET REPLAY FRON DB
@@ -17,9 +12,7 @@ if ($replayId) {
    $replayToEdit->bindValue(':id', $replayId);
    $replayToEdit->execute();
    $replay = implode($replayToEdit->fetch(PDO::FETCH_ASSOC));
-   // echo '<pre>';
-   // var_dump($replay);
-   // echo '</pre>';
+
 
    // STORE UPDATED REPLAY
    if ($_SERVER['REQUEST_METHOD'] == 'POST') {
@@ -39,9 +32,7 @@ if ($replayId) {
    $commentToEdit->bindValue(':id', $commentId);
    $commentToEdit->execute();
    $comment = implode($commentToEdit->fetch(PDO::FETCH_ASSOC));
-   // echo '<pre>';
-   // var_dump($comment);
-   // echo '</pre>';
+
 
    // STORE UPDATED COMMENT
    if ($_SERVER['REQUEST_METHOD'] == 'POST') {
@@ -55,10 +46,6 @@ if ($replayId) {
          header('Location: ' . $backToDetails);
       }
    }
-
-   // echo '<pre>';
-   // var_dump($editedComment);
-   // echo '</pre>';
 }
 
 ?>

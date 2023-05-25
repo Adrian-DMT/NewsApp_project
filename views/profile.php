@@ -49,8 +49,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
    <form action="" method="POST" enctype="multipart/form-data">
       <!--  -->
       <div class="">
-         <input type="file" name="image" class="mx-auto" image>
-         <!-- <input type="file" > -->
+         <input type="file" name="image" class="mx-auto" accept="image/png, image/jpg, image/jpeg">
+
       </div>
       <button class="border rounded w-48 px-6 py-2 my-3 mx-auto bg-slate-200 hover:bg-slate-300" type="submit">Change image</button>
    </form>

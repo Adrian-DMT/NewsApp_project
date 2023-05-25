@@ -22,6 +22,18 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && $_POST['comment'] !== '') {
 	$statement->execute();
 }
 
+// GET NEWS LIKES FROM DB
+$likedNews = $pdo->prepare("SELECT COUNT(thumbs_up) as thumbs_up FROM like_dislike_news WHERE (id_news = $newsId and thumbs_up = 1 )");
+$likedNews->execute();
+$liked_news = $likedNews->fetchAll(PDO::FETCH_ASSOC);
+
+
+// GET NEWS DISLIKES FROM DB
+$dislikedNews = $pdo->prepare("SELECT COUNT(thumbs_down) as thumbs_down FROM like_dislike_news WHERE (id_news = $newsId and thumbs_down = 1 )");
+$dislikedNews->execute();
+$disliked_news = $dislikedNews->fetchAll(PDO::FETCH_ASSOC);
+
+
 // GET COMMENTS and USERS FROM DB
 $dataUsers = $pdo->prepare("SELECT * FROM users RIGHT JOIN comments ON users.id  = comments.id_users  ORDER BY comments.created_date DESC");
 $dataUsers->execute();
@@ -31,6 +43,10 @@ $users = $dataUsers->fetchAll(PDO::FETCH_ASSOC);
 $dataReplay = $pdo->prepare("SELECT users.username, users.profile_image, replays.id, replays.replay, replays.comment_id, replays.created_date FROM replays right JOIN users ON replays.id_user = users.id JOIN comments ON comments.id = replays.comment_id ORDER BY replays.created_date desc");
 $dataReplay->execute();
 $replays = $dataReplay->fetchAll(PDO::FETCH_ASSOC);
+
+
+$newsLike = $_POST['newsLike'] ?? '';
+$newsDislike = $_POST['newsDislike'] ?? '';
 
 ?>
 
@@ -57,25 +73,35 @@ $replays = $dataReplay->fetchAll(PDO::FETCH_ASSOC);
 	</div>
 	<!-- LIKE BUTTONS -->
 	<div class="flex flex-row mx-auto mb-5 justify-center">
+		<div>
+			<a href="<?php
+						if ($username) {
+							echo '#';
+						} else {
+							echo  '/views/login.php';
+						}
+						?>">
+				<form action="/components/likes_dislikes.php?id=<?= $newsId ?>&username=<?= $username ?>" method="POST">
+					<button type="submit" name="newsLike" <?= $username ? '' : 'disabled' ?> class="border rounded px-6 py-2 mx-2 bg-slate-200 hover:bg-slate-300" value="1">Like it... <i class="text-xl bi bi-hand-thumbs-up-fill"></i></button>
+				</form>
+			</a>
+			<p class="text-center"><?= $liked_news[0]['thumbs_up'] ?></p>
+		</div>
+		<div>
+			<a href="<?php
+						if ($username) {
+							echo '#';
+						} else {
+							echo  '/views/login.php';
+						}
+						?>">
+				<form action="/components/likes_dislikes.php?id=<?= $newsId ?>&username=<?= $username ?>" method="POST">
+					<button type="submit" name="newsDislike" <?= $username ? '' : 'disabled' ?> class="border rounded px-6 py-2 mx-2 bg-slate-200 hover:bg-slate-300" value="1"><i class=" text-xl bi bi-hand-thumbs-down-fill"></i> ... or not</button>
+				</form>
+			</a>
+			<p class="text-center"><?= $disliked_news[0]['thumbs_down'] ?></p>
+		</div>
 
-		<a href="<?php
-					if ($username) {
-						echo '#';
-					} else {
-						echo  '/views/login.php';
-					}
-					?>">
-			<form action="/components/likes_dislikes.php" method="POST"><button class="border rounded px-6 py-2 mx-2 bg-slate-200 hover:bg-slate-300">Like it... <i class="text-xl bi bi-hand-thumbs-up-fill "></i></button> </form>
-		</a>
-		<a href="<?php
-					if ($username) {
-						echo '#';
-					} else {
-						echo  '/views/login.php';
-					}
-					?>">
-			<form action="/components/likes_dislikes.php" method="POST"><button class="border rounded px-6 py-2 mx-2 bg-slate-200 hover:bg-slate-300"><i class=" text-xl bi bi-hand-thumbs-down-fill"></i> ... or not</button> </form>
-		</a>
 	</div>
 
 	<section class="mb-12">
@@ -86,7 +112,7 @@ $replays = $dataReplay->fetchAll(PDO::FETCH_ASSOC);
 						echo  '/views/login.php';
 					}
 					?>">
-			<h2 class="font-bold">Add a comment</h2>
+			<h2 class=" inline font-bold">Add a comment</h2>
 		</a>
 
 		<form action="" method="POST" class="flex flex-col">
