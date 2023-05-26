@@ -11,7 +11,7 @@ if ($username === []) {
 }
 
 
-$dataUsers = $pdo->prepare("SELECT * FROM comments  JOIN news ON  news.id = comments.id_news  JOIN  users ON users.id  = comments.id_users  WHERE users.username = '$username'");
+$dataUsers = $pdo->prepare("SELECT * FROM comments  JOIN news ON  news.id = comments.id_news  JOIN  users ON users.id  = comments.id_user  WHERE users.username = '$username'");
 $dataUsers->execute();
 $users = $dataUsers->fetchAll(PDO::FETCH_ASSOC);
 
