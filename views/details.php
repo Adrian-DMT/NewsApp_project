@@ -65,13 +65,6 @@ $dataReplay = $pdo->prepare("SELECT users.username, users.profile_image, replays
 $dataReplay->execute();
 $replays = $dataReplay->fetchAll(PDO::FETCH_ASSOC);
 
-echo '<pre>';
-var_dump($replays);
-echo '</pre>';
-
-// $newsLike = $_POST['newsLike'] ?? '';
-// $newsDislike = $_POST['newsDislike'] ?? '';
-
 ?>
 
 
