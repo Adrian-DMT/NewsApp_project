@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: May 24, 2023 at 01:27 PM
+-- Generation Time: May 26, 2023 at 12:11 PM
 -- Server version: 8.0.33-0ubuntu0.22.04.2
 -- PHP Version: 8.1.2-1ubuntu2.11
 
@@ -18,7 +18,7 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Database: `LogoNews-App`
+-- Database: `Test_LogoNews_App`
 --
 
 -- --------------------------------------------------------
@@ -31,7 +31,7 @@ CREATE TABLE `comments` (
   `id` int NOT NULL,
   `comment` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `id_news` int NOT NULL,
-  `id_users` int NOT NULL,
+  `id_user` int NOT NULL,
   `created_date` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
@@ -40,7 +40,7 @@ CREATE TABLE `comments` (
 -- Dumping data for table `comments`
 --
 
-INSERT INTO `comments` (`id`, `comment`, `id_news`, `id_users`, `created_date`, `updated_at`) VALUES
+INSERT INTO `comments` (`id`, `comment`, `id_news`, `id_user`, `created_date`, `updated_at`) VALUES
 (3, 'Comment number 3 ...', 24535, 2, '2023-03-01 10:32:43', '2023-03-17 13:20:51'),
 (4, 'Comment number 4 ...', 24535, 1, '2023-03-01 10:32:43', '2023-03-17 13:20:51'),
 (5, 'Ad, recusandae. Fugit, aspernatur. Temporibus, est! Molestias totam at rerum dolorem ipsum molestiae hic, omnis sapiente aliquid perferendis suscipit sit dolores!', 24535, 2, '2023-03-01 10:32:43', '2023-03-17 13:20:51'),
@@ -48,6 +48,75 @@ INSERT INTO `comments` (`id`, `comment`, `id_news`, `id_users`, `created_date`, 
 (39, 'A comment Test Name', 24535, 1, '2023-03-20 09:30:37', '2023-03-20 09:30:37'),
 (41, 'Lorem ipsum dolor sit amet consectetur, adipisicing elit. Asperiores quis praesentium assumenda obcaecati neque non eius fugit, distinctio at ex ....', 24535, 1, '2023-03-20 09:33:16', '2023-03-20 09:33:16'),
 (42, 'Test comment from Doe ...\r\n', 24535, 2, '2023-03-20 09:41:51', '2023-03-20 09:41:51');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `like_dislike_comments`
+--
+
+CREATE TABLE `like_dislike_comments` (
+  `thumbs_up` int NOT NULL,
+  `thumbs_down` int NOT NULL,
+  `id_user` int NOT NULL,
+  `comment_id` int NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Dumping data for table `like_dislike_comments`
+--
+
+INSERT INTO `like_dislike_comments` (`thumbs_up`, `thumbs_down`, `id_user`, `comment_id`) VALUES
+(1, 0, 1, 4),
+(0, 1, 1, 26),
+(1, 0, 1, 41),
+(1, 0, 1, 42),
+(1, 0, 2, 42);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `like_dislike_news`
+--
+
+CREATE TABLE `like_dislike_news` (
+  `thumbs_up` tinyint(1) DEFAULT NULL,
+  `thumbs_down` tinyint(1) DEFAULT NULL,
+  `id_news` int NOT NULL,
+  `id_user` int NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Dumping data for table `like_dislike_news`
+--
+
+INSERT INTO `like_dislike_news` (`thumbs_up`, `thumbs_down`, `id_news`, `id_user`) VALUES
+(1, 0, 24535, 1),
+(1, 0, 24535, 2),
+(0, 1, 24535, 28),
+(1, 0, 24542, 1),
+(1, 0, 24542, 2);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `like_dislike_replays`
+--
+
+CREATE TABLE `like_dislike_replays` (
+  `thumbs_up` tinyint(1) NOT NULL,
+  `thumbs_down` tinyint(1) NOT NULL,
+  `id_user` int NOT NULL,
+  `replay_id` int NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Dumping data for table `like_dislike_replays`
+--
+
+INSERT INTO `like_dislike_replays` (`thumbs_up`, `thumbs_down`, `id_user`, `replay_id`) VALUES
+(1, 0, 1, 39),
+(0, 1, 1, 40);
 
 -- --------------------------------------------------------
 
@@ -138,8 +207,9 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `name`, `username`, `email`, `password`, `profile_image`) VALUES
-(1, 'Test Name', 'testName', 'test@example.com', 'qy/4xomGmP7CU', '../images/6426ab642233d-200.jpg'),
-(2, 'John Doe', 'johnDoe', 'doe@example.com', 'qy/4xomGmP7CU', '../images/no-image.jpg');
+(1, 'Test Name', 'testName', 'test@example.com', 'qy/4xomGmP7CU', '../images/646f005de4a23-641451f863be6-pexels-luis-del-río-15286.jpg'),
+(2, 'John Doe', 'johnDoe', 'doe@example.com', 'qy/4xomGmP7CU', '../images/no-image.jpg'),
+(28, 'Test User', 'test', 'testNew@example.com', 'qy/4xomGmP7CU', '../images/no-image.jpg');
 
 --
 -- Indexes for dumped tables
@@ -150,8 +220,27 @@ INSERT INTO `users` (`id`, `name`, `username`, `email`, `password`, `profile_ima
 --
 ALTER TABLE `comments`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `id_users_edc` (`id_users`),
+  ADD KEY `id_users_edc` (`id_user`),
   ADD KEY `comments_news` (`id_news`);
+
+--
+-- Indexes for table `like_dislike_comments`
+--
+ALTER TABLE `like_dislike_comments`
+  ADD PRIMARY KEY (`id_user`,`comment_id`);
+
+--
+-- Indexes for table `like_dislike_news`
+--
+ALTER TABLE `like_dislike_news`
+  ADD PRIMARY KEY (`id_news`,`id_user`),
+  ADD KEY `id_users_like` (`id_user`);
+
+--
+-- Indexes for table `like_dislike_replays`
+--
+ALTER TABLE `like_dislike_replays`
+  ADD PRIMARY KEY (`id_user`,`replay_id`);
 
 --
 -- Indexes for table `news`
@@ -200,7 +289,7 @@ ALTER TABLE `replays`
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=28;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=29;
 
 --
 -- Constraints for dumped tables
@@ -211,7 +300,14 @@ ALTER TABLE `users`
 --
 ALTER TABLE `comments`
   ADD CONSTRAINT `comments_news` FOREIGN KEY (`id_news`) REFERENCES `news` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `id_users_edc` FOREIGN KEY (`id_users`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+  ADD CONSTRAINT `id_users_edc` FOREIGN KEY (`id_user`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Constraints for table `like_dislike_news`
+--
+ALTER TABLE `like_dislike_news`
+  ADD CONSTRAINT `id_news_like` FOREIGN KEY (`id_news`) REFERENCES `news` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT,
+  ADD CONSTRAINT `id_users_like` FOREIGN KEY (`id_user`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT;
 
 --
 -- Constraints for table `replays`

@@ -2,8 +2,12 @@
 
 require_once "../components/header.php";
 
+
 $newsId = $_GET['id'];
 $comment = '';
+$comment_id = $_GET['comment_id'] ?? '';
+
+
 // GET LOGED IN USER DATA FROM DB
 $query = $pdo->prepare("SELECT id FROM users WHERE username = '$username'");
 $query->execute();
@@ -12,12 +16,12 @@ $user = $query->fetch(PDO::FETCH_ASSOC);
 // PUT comment INTO DB
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && $_POST['comment'] !== '') {
 	$comment = $_POST['comment'];
-	$id_users = $user['id'];
+	$id_user = $user['id'];
 	$id_news = $_GET['id'];
 
-	$statement = $pdo->prepare("INSERT INTO comments (comment, id_users, id_news)VALUES(:comment, :id_users, :id_news)");
+	$statement = $pdo->prepare("INSERT INTO comments (comment, id_user, id_news)VALUES(:comment, :id_user, :id_news)");
 	$statement->bindValue(':comment', $comment);
-	$statement->bindValue(':id_users', $id_users);
+	$statement->bindValue(':id_user', $id_user);
 	$statement->bindValue(':id_news', $id_news);
 	$statement->execute();
 }
@@ -26,16 +30,33 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && $_POST['comment'] !== '') {
 $likedNews = $pdo->prepare("SELECT COUNT(thumbs_up) as thumbs_up FROM like_dislike_news WHERE (id_news = $newsId and thumbs_up = 1 )");
 $likedNews->execute();
 $liked_news = $likedNews->fetchAll(PDO::FETCH_ASSOC);
-
-
 // GET NEWS DISLIKES FROM DB
 $dislikedNews = $pdo->prepare("SELECT COUNT(thumbs_down) as thumbs_down FROM like_dislike_news WHERE (id_news = $newsId and thumbs_down = 1 )");
 $dislikedNews->execute();
 $disliked_news = $dislikedNews->fetchAll(PDO::FETCH_ASSOC);
 
 
+
+// GET COMMENTS LIKES FROM DB
+$likedComment = $pdo->prepare("SELECT comments.id, COUNT(thumbs_up) as thumbs_up FROM like_dislike_comments JOIN comments ON comments.id = comment_id WHERE thumbs_up = 1 GROUP BY comments.id");
+$likedComment->execute();
+$liked_comment = $likedComment->fetchAll(PDO::FETCH_ASSOC);
+// GET COMMENTS DISLIKES FROM DB
+$dislikedComment = $pdo->prepare("SELECT comments.id, COUNT(thumbs_down) as thumbs_down FROM like_dislike_comments JOIN comments ON comments.id = comment_id WHERE thumbs_down = 1 GROUP BY comments.id");
+$dislikedComment->execute();
+$disliked_comment = $dislikedComment->fetchAll(PDO::FETCH_ASSOC);
+
+// GET REPLAYS LIKES FROM DB
+$likedReplay = $pdo->prepare("SELECT replays.id, COUNT(thumbs_up) as thumbs_up FROM like_dislike_replays JOIN replays ON replays.id = replay_id WHERE thumbs_up = 1 GROUP BY replays.id");
+$likedReplay->execute();
+$liked_replay = $likedReplay->fetchAll(PDO::FETCH_ASSOC);
+// GET CREPLAYS DISLIKES FROM DB
+$dislikedReplay = $pdo->prepare("SELECT replays.id, COUNT(thumbs_down) as thumbs_down FROM like_dislike_replays JOIN replays ON replays.id = replay_id WHERE thumbs_down = 1 GROUP BY replays.id");
+$dislikedReplay->execute();
+$disliked_replay = $dislikedReplay->fetchAll(PDO::FETCH_ASSOC);
+
 // GET COMMENTS and USERS FROM DB
-$dataUsers = $pdo->prepare("SELECT * FROM users RIGHT JOIN comments ON users.id  = comments.id_users  ORDER BY comments.created_date DESC");
+$dataUsers = $pdo->prepare("SELECT * FROM users RIGHT JOIN comments ON users.id  = comments.id_user  ORDER BY comments.created_date DESC");
 $dataUsers->execute();
 $users = $dataUsers->fetchAll(PDO::FETCH_ASSOC);
 
@@ -44,9 +65,12 @@ $dataReplay = $pdo->prepare("SELECT users.username, users.profile_image, replays
 $dataReplay->execute();
 $replays = $dataReplay->fetchAll(PDO::FETCH_ASSOC);
 
+echo '<pre>';
+var_dump($replays);
+echo '</pre>';
 
-$newsLike = $_POST['newsLike'] ?? '';
-$newsDislike = $_POST['newsDislike'] ?? '';
+// $newsLike = $_POST['newsLike'] ?? '';
+// $newsDislike = $_POST['newsDislike'] ?? '';
 
 ?>
 
@@ -140,18 +164,23 @@ $newsDislike = $_POST['newsDislike'] ?? '';
 					<p class="indent-4 pt-2">
 						<?php echo $item['comment']; ?>
 					</p>
-					<div class="flex m-0 p-0 justify-end <?php echo (!$username) ? 'hidden' : '' ?>">
+					<div class="flex m-0 p-0 justify-end align-bottom <?php echo (!$username) ? 'hidden' : '' ?>">
 						<!-- LIKE -->
-						<form action="/components/likes_dislikes.php" method="POST" class="">
-							<button type="sumit" class="px-2 hover:text-green-500"><i class=" text-l bi bi-hand-thumbs-up-fill"></i></button>
+						<form action="/components/likes_dislikes.php?commentId=<?= $item['id'] ?>&id=<?= $newsId ?>&username=<?= $username ?>" method="POST" class="">
+							<button type="submit" name="commentLike" class=" px-2 hover:text-green-500" value="1"><i class=" text-l bi bi-hand-thumbs-up-fill"></i></button>
 						</form>
+						<?php foreach ($liked_comment as $liked) : ?>
+							<p class="text-center"><?= $item['id'] == $liked['id'] ? $liked['thumbs_up'] : '' ?></p>
+						<?php endforeach ?>
 						<!-- DISLIKE -->
-						<form action="/components/likes_dislikes.php" method="POST" class="">
-							<button type="sumit" class="px-2 hover:text-green-500"><i class=" text-l bi bi-hand-thumbs-down-fill"></i></button>
+						<form action="/components/likes_dislikes.php?commentId=<?= $item['id'] ?>&id=<?= $newsId ?>&username=<?= $username ?>" method="POST" class="">
+							<button type="submit" name="commentDislike" class="px-2 hover:text-green-500" value="1"><i class=" text-l bi bi-hand-thumbs-down-fill"></i></button>
 						</form>
+						<?php foreach ($disliked_comment as $disliked) : ?>
+							<p class="text-center"><?= $item['id'] == $disliked['id'] ? $disliked['thumbs_down'] : '' ?></p>
+						<?php endforeach ?>
 
-
-						<a href="../components/replay.php?commentId=<?= $item['id'] ?>&username=<?= $username ?>&id=<?= $newsId ?>" class="text-sm  text-grey-100 pb-4 ">Replay</a>
+						<a href="../components/replay.php?commentId=<?= $item['id'] ?>&username=<?= $username ?>&id=<?= $newsId ?>" class="text-sm  text-grey-100 text-center mx-2 ">Replay</a>
 					</div>
 
 
@@ -190,15 +219,21 @@ $newsDislike = $_POST['newsDislike'] ?? '';
 									<div class="flex justify-end">
 
 										<!-- LIKE -->
-										<form action="/components/likes_dislikes.php" method="POST" class="">
-											<button type="sumit" class="px-2 hover:text-green-500"><i class=" text-l bi bi-hand-thumbs-up-fill"></i></button>
+										<form action="/components/likes_dislikes.php?id=<?= $newsId ?>&username=<?= $username ?>&replayId=<?= $replay['id'] ?>" method="POST" class="">
+											<button type="submit" name="replayLike" class="px-2 hover:text-green-500" value="1"><i class=" text-l bi bi-hand-thumbs-up-fill"></i></button>
 										</form>
+										<?php foreach ($liked_replay as $liked) : ?>
+											<p class="text-center"><?= $replay['id'] == $liked['id'] ? $liked['thumbs_up'] : '' ?></p>
+										<?php endforeach ?>
 										<!-- DISLIKE -->
-										<form action="/components/likes_dislikes.php" method="POST" class="">
-											<button type="sumit" class="px-2 hover:text-green-500"><i class=" text-l bi bi-hand-thumbs-down-fill"></i></button>
+										<form action="/components/likes_dislikes.php?id=<?= $newsId ?>&username=<?= $username ?>&replayId=<?= $replay['id'] ?>" method="POST" class="">
+											<button type="submit" name="replayDislike" class="px-2 hover:text-green-500" value='1'><i class=" text-l bi bi-hand-thumbs-down-fill"></i></button>
 										</form>
+										<?php foreach ($disliked_replay as $disliked) : ?>
+											<p class="text-center"><?= $replay['id'] == $disliked['id'] ? $disliked['thumbs_down'] : '' ?></p>
+										<?php endforeach ?>
 
-										<a href='/components/replay.php?commentId=<?= $item['id'] ?>&username=<?= $username ?>&id=<?= $newsId ?>&replayId=<?= $replay['id'] ?>' class="text-sm text-grey-100 ">Replay
+										<a href='/components/replay.php?commentId=<?= $item['id'] ?>&username=<?= $username ?>&id=<?= $newsId ?>&replayId=<?= $replay['id'] ?>' class="text-sm text-grey-100" style="margin-left:0.5rem">Replay
 										</a>
 									</div>
 
